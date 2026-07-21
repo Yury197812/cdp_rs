@@ -16,3 +16,4 @@ pub mod screenshot;
 pub mod js;
 pub mod automation;
 pub mod email;
+pub mod analysis;
