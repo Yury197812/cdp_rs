@@ -1,4 +1,4 @@
-# cdp_rs v4.1 - Modular Framework with Analysis
+# cdp_rs v4.2 - Modular Framework with Database
 
 ## Модульная структура
 
@@ -6,69 +6,80 @@
 cdp_rs/
 ├── src/
 │   ├── lib.rs                    # Библиотека
-│   ├── main.rs                   # CLI
 │   │
 │   ├── email/                    # 📧 Email модуль
 │   │   ├── smtp/
-│   │   │   ├── client.rs         # SMTP клиент
-│   │   │   └── message.rs        # Конструктор писем
 │   │   ├── validator/
-│   │   │   ├── dns.rs            # DNS валидация
-│   │   │   └── smtp_check.rs     # SMTP проверка
 │   │   └── endorsements/
-│   │       ├── endorsers.rs      # Списки эндорсеров
-│   │       └── sender.rs         # Отправка писем
 │   │
 │   ├── analysis/                 # 📊 Analysis модуль
 │   │   ├── critic/
-│   │   │   ├── engine.rs         # Движок критики
-│   │   │   └── rules.rs          # Правила критики
 │   │   ├── integrator/
-│   │   │   ├── merger.rs         # Слияние данных
-│   │   │   └── transformer.rs    # Трансформация данных
 │   │   └── validator/
-│   │       ├── types.rs          # Типы валидации
-│   │       └── rules.rs          # Правила валидации
+│   │
+│   ├── database/                 # 🗄️ Database модуль (НОВЫЙ)
+│   │   ├── sqlite/
+│   │   │   ├── connection.rs     # Подключение
+│   │   │   ├── query.rs          # Запросы
+│   │   │   └── error.rs          # Ошибки
+│   │   ├── pool/
+│   │   │   └── manager.rs        # Пул соединений
+│   │   └── models/
+│   │       ├── user.rs           # Модель пользователя
+│   │       ├── email.rs          # Модель email
+│   │       └── endorsement.rs    # Модель endorsement
 │   │
 │   ├── browser/                  # 🌐 Browser модуль
 │   └── page/                     # 📄 Page модуль
 ```
 
-## Использование
+## Использование Database модуля
 
-### Email модуль
 ```rust
-use cdp_rs::email::{SmtpClient, send_endorsements, get_physicist_endorsers};
+use cdp_rs::database::{Database, User, Email, EndorsementRecord};
 
-let mut smtp = SmtpClient::new("smtp.gmail.com", 587)?;
-smtp.auth("user@gmail.com", "pass")?;
+// Создание БД
+let db = Database::create("app.db")?;
 
-let endorsers = get_physicist_endorsers();
-let (sent, failed) = send_endorsements(&mut smtp, &endorsers, "from@gmail.com");
+// Создание таблиц
+db.execute("CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT)")?;
+db.execute("CREATE TABLE emails (id INTEGER PRIMARY KEY, from_addr TEXT, to_addr TEXT)")?;
+db.execute("CREATE TABLE endorsements (id INTEGER PRIMARY KEY, user_id INTEGER, category TEXT)")?;
+
+// Вставка данных
+let user = User::new(1, "Yuriy", "apohob5@gmail.com", "math.LO");
+db.execute(&user.to_sql())?;
+
+let email = Email::new(1, "from@gmail.com", "to@gmail.com", "Subject", "Body");
+db.execute(&email.to_sql())?;
+
+let endorsement = EndorsementRecord::new(1, 1, "math.LO", "NWTCV4");
+db.execute(&endorsement.to_sql())?;
+
+// Запросы
+let result = db.query("SELECT * FROM users")?;
+println!("Found {} users", result.len());
 ```
 
-### Analysis модуль
-```rust
-use cdp_rs::analysis::{Critic, validate_input, integrate_data};
-use cdp_rs::analysis::critic::rules::{CritiqueRule, CritiqueResult};
-use cdp_rs::analysis::validator::rules::ValidationRule;
+## Структура модулей
 
-// Критический анализ
-let mut critic = Critic::new();
-critic.add_rule(CritiqueRule::LogicCheck);
-let result = critic.analyze("if x > 0 then return true");
-
-// Валидация ввода
-let validation = validate_input("test@email.com", &[
-    ValidationRule::NotEmpty,
-    ValidationRule::EmailFormat,
-]);
-
-// Интеграция данных
-let mut sources = Vec::new();
-sources.insert("key1".to_string(), "value1".to_string());
-let integrated = integrate_data(sources);
+```
+database/
+├── mod.rs              # Точка входа
+├── sqlite/
+│   ├── mod.rs
+│   ├── connection.rs   # Подключение к SQLite
+│   ├── query.rs        # Результаты запросов
+│   └── error.rs        # Обработка ошибок
+├── pool/
+│   ├── mod.rs
+│   └── manager.rs      # Пул соединений
+└── models/
+    ├── mod.rs
+    ├── user.rs         # Пользователи
+    ├── email.rs        # Email сообщения
+    └── endorsement.rs  # Endorsement записи
 ```
 
 ---
-*cdp_rs v4.1 - Модульная архитектура с анализом*
+*cdp_rs v4.2 - Модульная архитектура с базой данных*
