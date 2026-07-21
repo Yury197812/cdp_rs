@@ -5,6 +5,6 @@ pub mod models;
 pub mod rate_limit;
 
 pub use jwt::JwtService;
-pub use middleware::AuthMiddleware;
+pub use middleware::auth_middleware;
 pub use models::{User, Role, LoginRequest, RegisterRequest};
 pub use rate_limit::{RateLimiter, RateLimitConfig};

@@ -35,6 +35,7 @@ tokio-tungstenite = { version = "0.24", features = ["native-tls"] }
 rusqlite = { version = "0.31", features = ["bundled"] }
 axum = "0.7"
 tower-http = { version = "0.5", features = ["cors"] }
+jsonwebtoken = "9"
 
 [lib]
 name = "cdp_rs"
