@@ -1,98 +1,145 @@
-// orchestrator/workers/worker.rs - Worker implementation
+// orchestrator/workers/worker.rs - Worker implementation (FIXED)
 use crate::database::sqlite::connection::Database;
-use crate::orchestrator::core::task_manager::TaskManager;
 use crate::database::sqlite::error::DbError;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 pub struct Worker {
     id: String,
-    task_manager: TaskManager,
+    db: Arc<Mutex<Database>>,
     status: WorkerStatus,
+    timeout: Duration,
 }
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum WorkerStatus {
     Idle,
     Working,
-    Error,
+    Error(String),
 }
 
 impl Worker {
-    pub fn new(id: &str, db: Database) -> Self {
+    pub fn new(id: &str, db: Arc<Mutex<Database>>) -> Self {
         Worker {
             id: id.to_string(),
-            task_manager: TaskManager::new(db),
+            db,
             status: WorkerStatus::Idle,
+            timeout: Duration::from_secs(300), // 5 minutes default
         }
     }
     
-    /// Process a task
+    pub fn with_timeout(mut self, timeout: Duration) -> Self {
+        self.timeout = timeout;
+        self
+    }
+    
+    /// Process a task with error handling
     pub async fn process_task(&mut self, task_id: i64) -> Result<(), DbError> {
-        self.status = WorkerStatus::Working;
+        // Validate input
+        if task_id <= 0 {
+            return Err(DbError::ValidationError("Invalid task ID".to_string()));
+        }
         
+        self.status = WorkerStatus::Working;
         println!("[Worker {}] Processing task {}", self.id, task_id);
         
-        // Get task details
-        let task = self.task_manager.get_task(task_id)?;
+        // Get task details with timeout
+        let task = {
+            let db = self.db.lock().map_err(|e| DbError::QueryError(e.to_string()))?;
+            let result = db.query(&format!(
+                "SELECT id, title, description FROM tasks WHERE id = {}", task_id
+            ))?;
+            result.rows.first().cloned()
+        };
         
         if let Some(task) = task {
-            println!("[Worker {}] Task: {}", self.id, task.title);
-            println!("[Worker {}] Description: {}", self.id, task.description);
+            let title = task.get("title").cloned().unwrap_or_default();
+            let description = task.get("description").cloned().unwrap_or_default();
             
-            // Simulate work
-            tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+            println!("[Worker {}] Task: {}", self.id, title);
+            println!("[Worker {}] Description: {}", self.id, description);
             
-            // Mark as completed
-            self.task_manager.complete_task(task_id)?;
-            self.status = WorkerStatus::Idle;
-            
-            println!("[Worker {}] Task {} completed", self.id, task_id);
+            // Simulate work with timeout
+            match tokio::time::timeout(self.timeout, async {
+                tokio::time::sleep(Duration::from_secs(1)).await;
+                Ok::<(), DbError>(())
+            }).await {
+                Ok(Ok(_)) => {
+                    // Mark as completed
+                    {
+                        let db = self.db.lock().map_err(|e| DbError::QueryError(e.to_string()))?;
+                        db.execute(&format!(
+                            "UPDATE tasks SET status = 'completed' WHERE id = {}", task_id
+                        ))?;
+                    }
+                    self.status = WorkerStatus::Idle;
+                    println!("[Worker {}] Task {} completed", self.id, task_id);
+                }
+                Ok(Err(e)) => {
+                    self.status = WorkerStatus::Error(e.to_string());
+                    println!("[Worker {}] Task {} failed: {}", self.id, task_id, e);
+                    return Err(e);
+                }
+                Err(_) => {
+                    self.status = WorkerStatus::Error("Timeout".to_string());
+                    println!("[Worker {}] Task {} timed out", self.id, task_id);
+                    return Err(DbError::QueryError("Task timed out".to_string()));
+                }
+            }
         }
         
         Ok(())
     }
     
-    /// Get worker status
     pub fn status(&self) -> &WorkerStatus {
         &self.status
     }
     
-    /// Get worker ID
     pub fn id(&self) -> &str {
         &self.id
+    }
+    
+    pub fn is_idle(&self) -> bool {
+        self.status == WorkerStatus::Idle
     }
 }
 
 pub struct WorkerPool {
-    workers: Vec<Worker>,
+    workers: Vec<Arc<Mutex<Worker>>>,
 }
 
 impl WorkerPool {
-    pub fn new(size: usize, db_path: &str) -> Result<Self, crate::database::sqlite::error::DbError> {
+    pub fn new(size: usize, db_path: &str) -> Result<Self, DbError> {
         let mut workers = Vec::new();
         for i in 0..size {
-            let db = Database::new(db_path)?;
-            workers.push(Worker::new(&format!("worker-{}", i), db));
+            let db = Arc::new(Mutex::new(Database::new(db_path)?));
+            workers.push(Arc::new(Mutex::new(Worker::new(&format!("worker-{}", i), db))));
         }
         Ok(WorkerPool { workers })
     }
     
-    /// Get idle worker
-    pub fn get_idle_worker(&mut self) -> Option<&mut Worker> {
-        self.workers.iter_mut().find(|w| *w.status() == WorkerStatus::Idle)
+    pub fn get_idle_worker(&self) -> Option<Arc<Mutex<Worker>>> {
+        self.workers.iter().find(|w| {
+            w.try_lock().map_or(false, |w| w.is_idle())
+        }).cloned()
     }
     
-    /// Get pool statistics
     pub fn stats(&self) -> PoolStats {
-        let idle = self.workers.iter().filter(|w| *w.status() == WorkerStatus::Idle).count();
-        let working = self.workers.iter().filter(|w| *w.status() == WorkerStatus::Working).count();
-        let error = self.workers.iter().filter(|w| *w.status() == WorkerStatus::Error).count();
+        let mut idle = 0;
+        let mut working = 0;
+        let mut error = 0;
         
-        PoolStats {
-            total: self.workers.len(),
-            idle,
-            working,
-            error,
+        for worker in &self.workers {
+            if let Ok(w) = worker.try_lock() {
+                match &w.status() {
+                    WorkerStatus::Idle => idle += 1,
+                    WorkerStatus::Working => working += 1,
+                    WorkerStatus::Error(_) => error += 1,
+                }
+            }
         }
+        
+        PoolStats { total: self.workers.len(), idle, working, error }
     }
 }
 
