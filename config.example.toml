@@ -1,0 +1,26 @@
+# Orchestrator Configuration
+
+[server]
+host = "0.0.0.0"
+port = 8080
+
+[database]
+path = "data/orchestrator.db"
+
+[redis]
+url = "redis://localhost:6379"
+
+[logging]
+level = "info"
+file = "logs/orchestrator.log"
+
+[limits]
+max_projects = 100
+max_branches_per_project = 10
+max_chats_per_branch = 5
+max_tasks_per_branch = 1000
+max_workers = 16
+
+[orchestrator]
+sync_interval_secs = 300
+task_timeout_secs = 3600
