@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Окулус для ИИ-агента</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#0d1117; --card:#161b22; --border:#30363d; --text:#e6edf3; --dim:#8b949e; --accent:#58a6ff; --green:#3fb950; --red:#f85149; --yellow:#d29922; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; padding:40px 20px; max-width:1000px; margin:0 auto; }
+        h1 { font-size:2rem; background:linear-gradient(135deg,#58a6ff,#bc8cff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-align:center; margin-bottom:30px; }
+        h2 { color:var(--accent); border-bottom:1px solid var(--border); padding-bottom:8px; margin:30px 0 15px; }
+        .phase { background:var(--card); border-radius:12px; padding:24px; margin:15px 0; border:1px solid var(--border); }
+        .phase h3 { margin-top:0; }
+        .critic { border-left:4px solid var(--red); }
+        .surgeon { border-left:4px solid var(--yellow); }
+        .creator { border-left:4px solid var(--green); }
+        pre { background:#1a1f2e; border:1px solid var(--border); border-radius:8px; padding:16px; overflow-x:auto; font-family:'JetBrains Mono',monospace; font-size:0.85rem; }
+        table { width:100%; border-collapse:collapse; margin:15px 0; }
+        th,td { padding:10px 14px; border:1px solid var(--border); text-align:left; }
+        th { background:var(--card); font-weight:600; }
+        .arrow { text-align:center; font-size:2rem; color:var(--accent); margin:15px 0; }
+        .rule { background:var(--card); padding:12px 16px; margin:8px 0; border-radius:8px; border-left:3px solid var(--accent); }
+    </style>
+</head>
+<body>
+<h1>Протокол Окулус для ИИ-агента</h1>
+
+<h2>Как ИИ должен работать по Окулусу</h2>
+
+<div class="phase critic">
+<h3>ФАЗА 1: КРИТИК (Анализ)</h3>
+<p><strong>Когда:</strong> При получении любого запроса</p>
+<p><strong>Действия:</strong></p>
+<div class="rule">1. Проанализировать запрос — что хочет пользователь</div>
+<div class="rule">2. Найти ошибки/проблемы в текущем коде/контексте</div>
+<div class="rule">3. Определить слабые места</div>
+<div class="rule">4. Подготовить доказательную базу</div>
+<div class="rule">5. Берётся за слабое звено</div>
+<div class="rule">6. Сдаётся если 100% доказано</div>
+</div>
+
+<div class="arrow">↓</div>
+
+<div class="phase surgeon">
+<h3>ФАЗА 2: ХИРУРГ (Исправление)</h3>
+<p><strong>Когда:</strong> После анализа</p>
+<p><strong>Действия:</strong></p>
+<div class="rule">1. Исправить найденные ошибки</div>
+<div class="rule">2. Оптимизировать код</div>
+<div class="rule">3. Переписать на подходящий язык (Rust > C > Go)</div>
+<div class="rule">4. Разбить на модули и подмодули</div>
+<div class="rule">5. Убрать dead code</div>
+<div class="rule">6. Добавить обработку ошибок</div>
+<div class="rule">7. Добавить валидацию</div>
+<div class="rule">8. Добавить таймауты</div>
+</div>
+
+<div class="arrow">↓</div>
+
+<div class="phase creator">
+<h3>ФАЗА 3: ТВОРЕЦ (Создание)</h3>
+<p><strong>Когда:</strong> После исправлений</p>
+<p><strong>Действия:</strong></p>
+<div class="rule">1. Создать новую функциональность</div>
+<div class="rule">2. Продолжить написанное</div>
+<div class="rule">3. Написать больше протестированного кода</div>
+<div class="rule">4. Добавить тесты</div>
+<div class="rule">5. Обновить документацию</div>
+<div class="rule">6. Передать итог другой LLM на реализацию</div>
+</div>
+
+<h2>Правила поведения ИИ</h2>
+
+<div class="rule">1. <strong>Жёсткая, но конструктивная критика</strong> — не "ну в целом неплохо"</div>
+<div class="rule">2. <strong>Больше практики</strong> — код протестированный, готовый к использованию</div>
+<div class="rule">3. <strong>Разбиение на модули</strong> — пока целесообразно</div>
+<div class="rule">4. <strong>Код на оптимальных языках</strong> — Rust, C, Go, ASM</div>
+<div class="rule">5. <strong>Хранить всю информацию</strong> — для передачи другой LLM</div>
+<div class="rule">6. <strong>Пользователь регулирует настройки</strong> — в т.ч. юмор</div>
+
+<h2>Пример применения</h2>
+
+<pre>
+Запрос: "Исправь Worker.rs"
+
+ФАЗА 1 (Критик):
+- Database не потокобезопасен → критическая ошибка
+- Нет обработки ошибок → статус не сбрасывается
+- WorkerPool не Send → нельзя между потоками
+
+ФАЗА 2 (Хирург):
+- Database → Arc<Mutex<Database>>
+- WorkerStatus::Error(String)
+- WorkerPool → Arc<Mutex<Worker>>
+- Валидация task_id
+- Таймаут 5 мин
+
+ФАЗА 3 (Творец):
+- Тесты пройдены
+- GitHub обновлён
+- Документация обновлена
+</pre>
+
+<h2>Связь с Semantic Content Design</h2>
+
+<table>
+<tr><th>Концепция</th><th>Применение к ИИ</th></tr>
+<tr><td>Query Fan-out</td><td>Генерация связанных вопросов</td></tr>
+<tr><td>Session-based RAG</td><td>Контекст предыдущих ответов</td></tr>
+<tr><td>Intent Progression</td><td>4 уровня: Концепция → Контекст → Сравнение → Действие</td></tr>
+</table>
+
+<p style="color:var(--dim);margin-top:30px;">Окулус для ИИ-агента v1.0 | Применять ВСЕГДА</p>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Orchestrator LLM — Семантическая документация</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg:#0d1117; --card:#161b22; --border:#30363d; --text:#e6edf3; --dim:#8b949e; --accent:#58a6ff; --green:#3fb950; --yellow:#d29922; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); line-height:1.7; }
+        
+        .hero { background:linear-gradient(135deg, #1a1f2e 0%, #0d1117 100%); padding:60px 40px; text-align:center; border-bottom:1px solid var(--border); }
+        .hero h1 { font-size:2.5rem; background:linear-gradient(135deg,#58a6ff,#bc8cff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px; }
+        .hero p { color:var(--dim); font-size:1.1rem; }
+        
+        .container { max-width:1000px; margin:0 auto; padding:40px 20px; }
+        
+        h2 { font-size:1.5rem; color:var(--accent); margin:40px 0 20px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+        h3 { font-size:1.2rem; margin:25px 0 15px; }
+        
+        .intent-level { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; margin:20px 0; position:relative; }
+        .intent-level::before { content:attr(data-level); position:absolute; top:-12px; left:20px; background:var(--accent); color:white; padding:4px 12px; border-radius:20px; font-size:0.8rem; font-weight:600; }
+        .intent-level h3 { margin-top:10px; }
+        
+        .fan-out { background:var(--card); border-left:4px solid var(--green); padding:20px; margin:20px 0; border-radius:0 12px 12px 0; }
+        
+        .rag { background:var(--card); border-left:4px solid var(--yellow); padding:20px; margin:20px 0; border-radius:0 12px 12px 0; }
+        
+        .code-block { background:#1a1f2e; border:1px solid var(--border); border-radius:8px; padding:16px; font-family:'JetBrains Mono',monospace; font-size:0.85rem; overflow-x:auto; margin:15px 0; }
+        
+        table { width:100%; border-collapse:collapse; margin:15px 0; }
+        th,td { padding:10px 14px; border:1px solid var(--border); text-align:left; }
+        th { background:var(--card); font-weight:600; }
+        
+        .highlight { background:rgba(88,166,255,0.1); border-left:3px solid var(--accent); padding:16px; margin:15px 0; border-radius:0 8px 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Orchestrator LLM</h1>
+        <p>Семантическая документация с прогрессией интента</p>
+    </div>
+    
+    <div class="container">
+        <h2>Прогрессия интента пользователя</h2>
+        
+        <div class="intent-level" data-level="Уровень 1: Концепция">
+            <h3>Что такое Orchestrator LLM?</h3>
+            <p>Система для массовой обработки задач в ChatGPT с управлением проектами, ветками и координацией.</p>
+            <div class="highlight">
+                <strong>Ключевая ценность:</strong> Управляемая обработка множества независимых рабочих веток без смешивания контекстов.
+            </div>
+        </div>
+        
+        <div class="intent-level" data-level="Уровень 2: Контекст">
+            <h3>Как это работает?</h3>
+            <p>Система использует модульную архитектуру на Rust:</p>
+            <div class="code-block">
+orchestrator/
+├── core/      → ProjectManager, BranchManager, ChatManager, TaskManager
+├── workers/   → Worker, WorkerPool
+├── coordinator/ → DependencyMonitor, DataExchange, SyncManager
+└── dashboard/ → API (Axum), WebSocket, Stats
+            </div>
+            <p><strong>Зависимости:</strong> SQLite (rusqlite), Tokio, Axum</p>
+        </div>
+        
+        <div class="intent-level" data-level="Уровень 3: Сравнение">
+            <h3>Преимущества</h3>
+            <table>
+                <tr><th>Критерий</th><th>Orchestrator LLM</th><th>Альтернативы</th></tr>
+                <tr><td>Производительность</td><td>Rust (высокая)</td><td>Python (средняя)</td></tr>
+                <tr><td>Безопасность</td><td>Memory-safe</td><td>Зависит от языка</td></tr>
+                <tr><td>Модульность</td><td>8 модулей</td><td>Монолит</td></tr>
+                <tr><td>Тесты</td><td>145+</td><td>Варьируется</td></tr>
+            </table>
+        </div>
+        
+        <div class="intent-level" data-level="Уровень 4: Действие">
+            <h3>Быстрый старт</h3>
+            <div class="code-block">
+# Docker
+docker-compose up -d
+
+# Локально
+cargo build --release
+./target/release/orchestrator
+
+# API
+curl http://localhost:8080/api/overview
+            </div>
+            <p><strong>GitHub:</strong> <a href="https://github.com/Yury197812/cdp_rs">Yury197812/cdp_rs</a></p>
+        </div>
+        
+        <h2>Query Fan-out паттерн</h2>
+        <div class="fan-out">
+            <p>При запросе "Как использовать Orchestrator?" система генерирует:</p>
+            <ul>
+                <li>→ Как установить?</li>
+                <li>→ Как настроить API?</li>
+                <li>→ Как добавить проект?</li>
+                <li>→ Как мониторить задачи?</li>
+            </ul>
+            <p><strong>Все ответы на одной странице</strong> — пользователь не уходит с сайта.</p>
+        </div>
+        
+        <h2>Session-based RAG</h2>
+        <div class="rag">
+            <p>Модель удерживает контекст:</p>
+            <ul>
+                <li>Сессия 1: "Установка" → ответ: Docker команды</li>
+                <li>Сессия 2: "API" → ответ: HTTP endpoints</li>
+                <li>Сессия 3: "Мониторинг" → ответ: WebSocket + Stats</li>
+            </ul>
+            <p><strong>Каждый ответ строится на предыдущем</strong> — связность контекста.</p>
+        </div>
+        
+        <h2>Прогрессия интента</h2>
+        <table>
+            <tr><th>Уровень</th><th>Вопрос</th><th>Ответ</th></tr>
+            <tr><td>1. Концепция</td><td>Что это?</td><td>Система управления проектами для LLM</td></tr>
+            <tr><td>2. Контекст</td><td>Как работает?</td><td>Модули: core, workers, coordinator, dashboard</td></tr>
+            <tr><td>3. Сравнение</td><td>Почему Rust?</td><td>Производительность, безопасность, модульность</td></tr>
+            <tr><td>4. Действие</td><td>Как начать?</td><td>docker-compose up -d</td></tr>
+        </table>
+        
+        <h2>Структура документации</h2>
+        <div class="code-block">
+README.html        → Обзор (Уровень 1-2)
+DOCS.html          → API (Уровень 2-3)
+ORCHESTRATOR_TZ.md → ТЗ (Уровень 3-4)
+MIMO_OS.md         → Точка запуска
+        </div>
+        
+        <div class="highlight">
+            <strong>Протокол Окулус:</strong> Каждая секция проходит 3 фазы — Критик (ошибки), Хирург (исправление), Творец (результат).
+        </div>
+    </div>
+</body>
+</html>

@@ -2,20 +2,23 @@
 use crate::orchestrator::core::{ProjectManager, BranchManager, TaskManager};
 use crate::database::sqlite::connection::Database;
 use crate::database::sqlite::error::DbError;
+use crate::database::models::User;
 
 pub struct DashboardApi {
     project_manager: ProjectManager,
     branch_manager: BranchManager,
     task_manager: TaskManager,
+    db: Database,
 }
 
 impl DashboardApi {
     pub fn new(db_path: &str) -> Result<Self, DbError> {
         let db = Database::new(db_path)?;
         Ok(DashboardApi {
-            project_manager: ProjectManager::new(db),
+            project_manager: ProjectManager::new(Database::new(db_path)?),
             branch_manager: BranchManager::new(Database::new(db_path)?),
             task_manager: TaskManager::new(Database::new(db_path)?),
+            db,
         })
     }
     
@@ -59,6 +62,37 @@ impl DashboardApi {
             .map_err(|e| e.to_string())?;
         
         Ok(serde_json::to_value(tasks).unwrap_or_default())
+    }
+    
+    // User methods
+    pub fn get_all_users(&self) -> Result<Vec<User>, String> {
+        self.db.get_all_users().map_err(|e| e.to_string())
+    }
+    
+    pub fn get_user(&self, id: i64) -> Result<Option<User>, String> {
+        self.db.get_user(id).map_err(|e| e.to_string())
+    }
+    
+    pub fn create_user(&self, name: &str, email: &str, category: &str) -> Result<User, String> {
+        let id = self.db.insert_user(name, email, category)
+            .map_err(|e| e.to_string())?;
+        Ok(User::with_id(id, name, email, category))
+    }
+    
+    pub fn update_user(&self, id: i64, name: &str, email: &str) -> Result<(), String> {
+        self.db.execute(&format!(
+            "UPDATE users SET name = '{}', email = '{}' WHERE id = {}",
+            name, email, id
+        )).map_err(|e| e.to_string())?;
+        Ok(())
+    }
+    
+    pub fn delete_user(&self, id: i64) -> Result<(), String> {
+        self.db.execute(&format!(
+            "DELETE FROM users WHERE id = {}",
+            id
+        )).map_err(|e| e.to_string())?;
+        Ok(())
     }
 }
 
