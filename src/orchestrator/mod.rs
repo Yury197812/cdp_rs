@@ -5,6 +5,7 @@ pub mod coordinator;
 pub mod dashboard;
 pub mod auth;
 pub mod logging;
+pub mod cache;
 
 pub use core::project_manager::ProjectManager;
 pub use core::branch_manager::BranchManager;
@@ -16,3 +17,4 @@ pub use coordinator::{DependencyMonitor, DataExchange, SyncManager};
 pub use dashboard::{DashboardApi, WebSocketServer, DashboardStats};
 pub use auth::{JwtService, auth_middleware, RateLimiter, RateLimitConfig};
 pub use logging::{Logger, Metrics};
+pub use cache::{LruCache, TtlCache};
