@@ -5,4 +5,4 @@ pub mod models;
 
 pub use sqlite::{Database, QueryResult};
 pub use pool::ConnectionPool;
-pub use models::{User, Email, EndorsementRecord};
+pub use models::{User, Email, Endorsement};

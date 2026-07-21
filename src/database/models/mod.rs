@@ -5,4 +5,4 @@ pub mod endorsement;
 
 pub use user::User;
 pub use email::Email;
-pub use endorsement::EndorsementRecord;
+pub use endorsement::Endorsement;
