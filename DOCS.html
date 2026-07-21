@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orchestrator LLM - API Documentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent: #58a6ff;
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --border: #30363d;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 40px 20px;
+        }
+        
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #58a6ff, #bc8cff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin: 40px 0 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+        
+        .endpoint {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            margin-right: 10px;
+        }
+        
+        .method-get { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+        .method-post { background: rgba(88, 166, 255, 0.2); color: var(--accent); }
+        .method-put { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
+        .method-delete { background: rgba(248, 81, 73, 0.2); color: var(--danger); }
+        
+        .path {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        pre {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .response {
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--success);
+            padding: 12px 16px;
+            margin: 10px 0;
+            border-radius: 0 8px 8px 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📡 API Documentation</h1>
+        
+        <h2>Базовый URL</h2>
+        <pre>http://localhost:8080</pre>
+        
+        <h2>Эндпоинты</h2>
+        
+        <div class="endpoint">
+            <span class="method method-get">GET</span>
+            <span class="path">/health</span>
+            <p>Проверка здоровья сервера</p>
+            <pre>curl http://localhost:8080/health</pre>
+            <div class="response">Status: 200 OK</div>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method method-get">GET</span>
+            <span class="path">/api/overview</span>
+            <p>Обзор системы: количество проектов, активных, завершённых</p>
+            <pre>curl http://localhost:8080/api/overview</pre>
+            <div class="response">{"projects": 5, "active": 3, "completed": 2}</div>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method method-get">GET</span>
+            <span class="path">/api/projects/:id</span>
+            <p>Детали конкретного проекта</p>
+            <pre>curl http://localhost:8080/api/projects/1</pre>
+            <div class="response">{"id": 1, "name": "Orchestrator LLM", "description": "...", "status": "active"}</div>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method method-get">GET</span>
+            <span class="path">/api/projects/:id/branches</span>
+            <p>Список веток проекта</p>
+            <pre>curl http://localhost:8080/api/projects/1/branches</pre>
+            <div class="response">[{"id": 1, "name": "Analysis", "role": "worker"}, ...]</div>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method method-get">GET</span>
+            <span class="path">/api/projects/:id/tasks</span>
+            <p>Список задач проекта</p>
+            <pre>curl http://localhost:8080/api/projects/1/tasks</pre>
+            <div class="response">[{"id": 1, "title": "Implement API", "status": "pending"}, ...]</div>
+        </div>
+        
+        <h2>Коды ответов</h2>
+        <table>
+            <tr><th>Код</th><th>Описание</th></tr>
+            <tr><td>200</td><td>Успех</td></tr>
+            <tr><td>400</td><td>Неверный запрос</td></tr>
+            <tr><td>404</td><td>Не найдено</td></tr>
+            <tr><td>500</td><td>Внутренняя ошибка сервера</td></tr>
+        </table>
+    </div>
+</body>
+</html>
